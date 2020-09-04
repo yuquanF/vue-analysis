@@ -3,6 +3,7 @@
 Vue 的 `_render` 方法是实例的一个私有方法，它用来把实例渲染成一个虚拟 Node。它的定义在 `src/core/instance/render.js` 文件中：
 
 ```js
+/*_render渲染函数，返回一个VNode节点*/
 Vue.prototype._render = function (): VNode {
   const vm: Component = this
   const { render, _parentVnode } = vm.$options
@@ -25,6 +26,7 @@ Vue.prototype._render = function (): VNode {
   // render self
   let vnode
   try {
+    /*调用render函数，返回一个VNode节点*/
     vnode = render.call(vm._renderProxy, vm.$createElement)
   } catch (e) {
     handleError(e, vm, `render`)
@@ -47,6 +49,7 @@ Vue.prototype._render = function (): VNode {
     }
   }
   // return empty vnode in case the render function errored out
+  /*如果VNode节点没有创建成功则创建一个空节点*/
   if (!(vnode instanceof VNode)) {
     if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
       warn(
@@ -63,7 +66,7 @@ Vue.prototype._render = function (): VNode {
 }
 ```
 
-这段代码最关键的是 `render` 方法的调用，我们在平时的开发工作中手写 `render` 方法的场景比较少，而写的比较多的是 `template` 模板，在之前的 `mounted` 方法的实现中，会把 `template` 编译成 `render` 方法，但这个编译过程是非常复杂的，我们不打算在这里展开讲，之后会专门花一个章节来分析 Vue 的编译过程。 
+这段代码最关键的是 `render` 方法的调用，我们在平时的开发工作中手写 `render` 方法的场景比较少，而写的比较多的是 `template` 模板，**在之前的 `mounted` 方法的实现中，会把 `template` 编译成 `render` 方法**，但这个编译过程是非常复杂的，我们不打算在这里展开讲，之后会专门花一个章节来分析 Vue 的编译过程。
 
 在 Vue 的官方文档中介绍了 `render` 函数的第一个参数是 `createElement`，那么结合之前的例子：
 
@@ -110,7 +113,8 @@ export function initRender (vm: Component) {
 
 实际上，`vm.$createElement` 方法定义是在执行 `initRender` 方法的时候，可以看到除了 `vm.$createElement` 方法，还有一个 `vm._c` 方法，它是被模板编译成的 `render` 函数使用，而 `vm.$createElement` 是用户手写 `render` 方法使用的， 这俩个方法支持的参数相同，并且内部都调用了 `createElement` 方法。
 
-
 ## 总结
 
+:::tip
 `vm._render` 最终是通过执行 `createElement` 方法并返回的是 `vnode`，它是一个虚拟 Node。Vue 2.0 相比 Vue 1.0 最大的升级就是利用了 Virtual DOM。因此在分析 `createElement` 的实现前，我们先了解一下 Virtual DOM 的概念。
+:::

@@ -14,12 +14,15 @@ import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
 
+/*根据id获取templete，即获取id对应的DOM，然后访问其innerHTML*/
 const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
 })
 
+/*把原本不带编译的$mount方法保存下来，在最后会调用。*/
 const mount = Vue.prototype.$mount
+/*挂载组件，带模板编译*/
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -36,9 +39,12 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  /*处理模板templete，编译成render函数，render不存在的时候才会编译template，否则优先使用render*/
   if (!options.render) {
     let template = options.template
+    /*template存在的时候取template，不存在的时候取el的outerHTML*/
     if (template) {
+      /*当template是字符串的时候*/
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
@@ -51,6 +57,7 @@ Vue.prototype.$mount = function (
           }
         }
       } else if (template.nodeType) {
+        /*当template为DOM节点的时候*/
         template = template.innerHTML
       } else {
         if (process.env.NODE_ENV !== 'production') {
@@ -59,6 +66,7 @@ Vue.prototype.$mount = function (
         return this
       }
     } else if (el) {
+      /*获取element的outerHTML*/
       template = getOuterHTML(el)
     }
     if (template) {
@@ -67,6 +75,7 @@ Vue.prototype.$mount = function (
         mark('compile')
       }
 
+      /*将template编译成render函数，这里会有render以及staticRenderFns两个返回，这是vue的编译时优化，static静态不需要在VNode更新时进行patch，优化性能*/
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
         shouldDecodeNewlinesForHref,
@@ -83,6 +92,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  /*调用const mount = Vue.prototype.$mount保存下来的不带编译的mount*/
   return mount.call(this, el, hydrating)
 }
 
@@ -90,6 +100,7 @@ Vue.prototype.$mount = function (
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
  */
+/*获取element的outerHTML*/
 function getOuterHTML (el: Element): string {
   if (el.outerHTML) {
     return el.outerHTML
@@ -148,11 +159,14 @@ extend(Vue.options.components, platformComponents)
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
+/*组件挂载方法*/
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  /*获取DOM实例对象*/
   el = el && inBrowser ? query(el) : undefined
+  /*挂载组件*/
   return mountComponent(this, el, hydrating)
 }
 
@@ -169,6 +183,7 @@ import { initGlobalAPI } from './global-api/index'
 import { isServerRendering } from 'core/util/env'
 import { FunctionalRenderContext } from 'core/vdom/create-functional-component'
 
+/*初始化全局 Vue API*/
 initGlobalAPI(Vue)
 
 Object.defineProperty(Vue.prototype, '$isServer', {
@@ -210,6 +225,7 @@ function Vue (options) {
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
+  /*初始化*/
   this._init(options)
 }
 
@@ -221,9 +237,9 @@ renderMixin(Vue)
 
 export default Vue
 ```
-在这里，我们终于看到了 Vue 的庐山真面目，它实际上就是一个用 Function 实现的类，我们只能通过 `new Vue` 去实例化它。
+在这里，我们终于看到了 Vue 的庐山真面目，它实际上就是一个**用 Function 实现的类**，我们只能通过 `new Vue` 去实例化它。
 
-有些同学看到这不禁想问，为何 Vue 不用 ES6 的 Class 去实现呢？我们往后看这里有很多 ```xxxMixin``` 的函数调用，并把 `Vue` 当参数传入，它们的功能都是给 Vue 的 prototype 上扩展一些方法（这里具体的细节会在之后的文章介绍，这里不展开），Vue 按功能把这些扩展分散到多个模块中去实现，而不是在一个模块里实现所有，这种方式是用 Class 难以实现的。这么做的好处是非常方便代码的维护和管理，这种编程技巧也非常值得我们去学习。
+有些同学看到这不禁想问，为何 Vue 不用 ES6 的 Class 去实现呢？我们往后看这里有很多 ```xxxMixin``` 的函数调用，并把 `Vue` 当参数传入，**它们的功能都是给 Vue 的 prototype 上扩展一些方法**（这里具体的细节会在之后的文章介绍，这里不展开），**Vue 按功能把这些扩展分散到多个模块中去实现，而不是在一个模块里实现所有**，这种方式是用 Class 难以实现的。这么做的好处是非常方便代码的维护和管理，这种编程技巧也非常值得我们去学习。
 
 ### `initGlobalAPI`
 
@@ -264,6 +280,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
 
   // this is used to identify the "base" constructor to extend all plain-object
   // components with in Weex's multi-instance scenarios.
+  /*_base被用来标识基本构造函数（也就是Vue），以便在多场景下添加组件扩展*/
   Vue.options._base = Vue
 
   extend(Vue.options.components, builtInComponents)
@@ -278,4 +295,6 @@ export function initGlobalAPI (Vue: GlobalAPI) {
 
 ## 总结
 
-那么至此，Vue 的初始化过程基本介绍完毕。这一节的目的是让同学们对 Vue 是什么有一个直观的认识，它本质上就是一个用 Function 实现的 Class，然后它的原型 prototype 以及它本身都扩展了一系列的方法和属性，那么 Vue 能做什么，它是怎么做的，我们会在后面的章节一层层帮大家揭开 Vue 的神秘面纱。
+:::tip
+那么至此，Vue 的初始化过程基本介绍完毕。这一节的目的是让同学们对 Vue 是什么有一个直观的认识，**它本质上就是一个用 Function 实现的 Class，然后它的原型 prototype 以及它本身都扩展了一系列的方法和属性**，那么 Vue 能做什么，它是怎么做的，我们会在后面的章节一层层帮大家揭开 Vue 的神秘面纱。
+:::

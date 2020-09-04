@@ -9,6 +9,7 @@ function Vue (options) {
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
+  /*初始化*/
   this._init(options)
 }
 ```
@@ -29,6 +30,7 @@ Vue.prototype._init = function (options?: Object) {
   }
 
   // a flag to avoid this being observed
+  /*一个防止vm实例自身被观察的标志位*/
   vm._isVue = true
   // merge options
   if (options && options._isComponent) {
@@ -51,32 +53,36 @@ Vue.prototype._init = function (options?: Object) {
   }
   // expose real self
   vm._self = vm
-  initLifecycle(vm)
-  initEvents(vm)
-  initRender(vm)
-  callHook(vm, 'beforeCreate')
+  initLifecycle(vm) /*初始化生命周期*/
+  initEvents(vm) /*初始化事件*/
+  initRender(vm) /*初始化render*/
+  callHook(vm, 'beforeCreate') /*调用beforeCreate钩子函数并且触发beforeCreate钩子事件*/
   initInjections(vm) // resolve injections before data/props
-  initState(vm)
+  initState(vm) /*初始化props、methods、data、computed与watch*/
   initProvide(vm) // resolve provide after data/props
-  callHook(vm, 'created')
+  callHook(vm, 'created') /*调用created钩子函数并且触发created钩子事件*/
 
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+    /*格式化组件名*/
     vm._name = formatComponentName(vm, false)
     mark(endTag)
     measure(`vue ${vm._name} init`, startTag, endTag)
   }
 
   if (vm.$options.el) {
+    /*挂载组件*/
     vm.$mount(vm.$options.el)
   }
 }
 ```
 
-Vue 初始化主要就干了几件事情，合并配置，初始化生命周期，初始化事件中心，初始化渲染，初始化 data、props、computed、watcher 等等。
+Vue 初始化主要就干了几件事情，**合并配置**，**初始化生命周期**，**初始化事件中心**，**初始化渲染**，**初始化 data、props、computed、watcher 等等**。
 
 ## 总结
 
+:::tip
 Vue 的初始化逻辑写的非常清楚，把不同的功能逻辑拆成一些单独的函数执行，让主线逻辑一目了然，这样的编程思想是非常值得借鉴和学习的。
 
-由于我们这一章的目标是弄清楚模板和数据如何渲染成最终的 DOM，所以各种初始化逻辑我们先不看。在初始化的最后，检测到如果有 `el` 属性，则调用 `vm.$mount` 方法挂载 `vm`，挂载的目标就是把模板渲染成最终的 DOM，那么接下来我们来分析 Vue 的挂载过程。
+由于我们这一章的目标是弄清楚模板和数据如何渲染成最终的 DOM，所以各种初始化逻辑我们先不看。在初始化的最后，检测到如果有 `el` 属性，则调用 `vm.$mount` 方法挂载 `vm`，**挂载的目标就是把模板渲染成最终的 DOM**，那么接下来我们来分析 Vue 的挂载过程。
+:::

@@ -17,9 +17,7 @@ module.exports = {
   serviceWorker: false,
   themeConfig: {
     repo: 'ustbhuangyi/vue-analysis',
-    editLinks: true,
     docsDir: 'docs',
-    editLinkText: '在 GitHub 上编辑此页',
     lastUpdated: '上次更新',
     nav: [
       {
@@ -31,13 +29,10 @@ module.exports = {
         link: '/v3/new/'
       },
       {
-        text: '2.x 源码配套视频',
-        link: 'https://coding.imooc.com/class/228.html'
+        text: '返回主页',
+        link: 'https://www.yuquanfeng.xyz',
+        target:'_self'
       },
-      {
-        text: '3.x 源码解析课程',
-        link: 'https://kaiwu.lagou.com/course/courseInfo.htm?courseId=326#/content'
-      }
     ],
     sidebar: {
       '/v2/': [
