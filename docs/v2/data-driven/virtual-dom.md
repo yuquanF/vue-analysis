@@ -47,26 +47,26 @@ export default class VNode {
     componentOptions?: VNodeComponentOptions,
     asyncFactory?: Function
   ) {
-    this.tag = tag
-    this.data = data
-    this.children = children
-    this.text = text
-    this.elm = elm
-    this.ns = undefined
-    this.context = context
-    this.fnContext = undefined
+    this.tag = tag /*当前节点的标签名*/
+    this.data = data /*当前节点对应的对象，包含了具体的一些数据信息，是一个VNodeData类型，可以参考VNodeData类型中的数据信息*/
+    this.children = children /*当前节点的子节点，是一个数组*/
+    this.text = text  /*当前节点的文本*/
+    this.elm = elm /*当前虚拟节点对应的真实dom节点*/
+    this.ns = undefined /*当前节点的名字空间*/
+    this.context = context /*当前节点的编译作用域*/
+    this.fnContext = undefined /*函数化组件作用域*/
     this.fnOptions = undefined
     this.fnScopeId = undefined
-    this.key = data && data.key
-    this.componentOptions = componentOptions
-    this.componentInstance = undefined
-    this.parent = undefined
-    this.raw = false
-    this.isStatic = false
-    this.isRootInsert = true
-    this.isComment = false
-    this.isCloned = false
-    this.isOnce = false
+    this.key = data && data.key /*节点的key属性，被当作节点的标志，用以优化*/
+    this.componentOptions = componentOptions /*组件的option选项*/
+    this.componentInstance = undefined /*当前节点对应的组件的实例*/
+    this.parent = undefined /*当前节点的父节点*/
+    this.raw = false /*简而言之就是是否为原生HTML或只是普通文本，innerHTML的时候为true，textContent的时候为false*/
+    this.isStatic = false /*是否为静态节点*/
+    this.isRootInsert = true /*是否作为根节点插入*/
+    this.isComment = false /*是否为注释节点*/
+    this.isCloned = false /*是否为克隆节点*/
+    this.isOnce = false /*是否有v-once指令*/
     this.asyncFactory = asyncFactory
     this.asyncMeta = undefined
     this.isAsyncPlaceholder = false
@@ -84,6 +84,8 @@ export default class VNode {
 
 ## 总结
 
-其实 VNode 是对真实 DOM 的一种抽象描述，它的核心定义无非就几个关键属性，标签名、数据、子节点、键值等，其它属性都是用来扩展 VNode 的灵活性以及实现一些特殊 feature 的。由于 VNode 只是用来映射到真实 DOM 的渲染，不需要包含操作 DOM 的方法，因此它是非常轻量和简单的。
+:::tip
+其实 VNode 是对真实 DOM 的一种抽象描述，它的核心定义无非就几个关键属性，标签名、数据、子节点、键值等，其它属性都是用来扩展 VNode 的灵活性以及实现一些特殊 feature 的。**由于 VNode 只是用来映射到真实 DOM 的渲染，不需要包含操作 DOM 的方法，因此它是非常轻量和简单的。**
 
 Virtual DOM 除了它的数据结构的定义，映射到真实的 DOM 实际上要经历 VNode 的 create、diff、patch 等过程。那么在 Vue.js 中，VNode 的 create 是通过之前提到的 `createElement` 方法创建的，我们接下来分析这部分的实现。
+:::
